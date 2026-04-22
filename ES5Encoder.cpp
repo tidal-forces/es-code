@@ -47,12 +47,12 @@ static inline uint32_t clampByte(float x) {
  *  #define ES_BITSTOFLOAT( bits )	\
  *  	( ( bits & 0x800000 ) ? ( (((float)(0xffffff&(-(SInt32)(bits)))) / btf_n_factor ) ) : ( ((float)(bits)) / btf_p_factor ) ) */
 static inline float bitsToFloat24(uint32_t bits) {
-    const float btf_n_factor = -(float)0x800000;			
-    const float btf_p_factor = (float)0x800000;
-    if ( bits & 0x800000u ) {
-        return ((float)(0x00ffffffu&(-(int32_t)(bits)))) / btf_n_factor;
+    const float btf_neg_factor = -(float)0x800000;			
+    const float btf_pos_factor = (float)0x800000;
+    if ( bits & 0x800000u ) {            //check if top bit set
+        return ((float)(0x00ffffffu&(-(int32_t)(bits)))) / btf_neg_factor;
     } else {
-        return ((float)(bits)) / btf_p_factor;
+        return ((float)(bits)) / btf_pos_factor;
     } 
 }
 
@@ -67,15 +67,15 @@ static void ES5Encoder_next(ES5Encoder* unit, int inNumSamples) {
 
     // scsynth saves memory by aliasing wire buffers. In this case, "out" and "left" are the same. You should either
     // be mindful of this behavior or turn it off in the PluginLoad section.
-    const float *in1 = IN(0); // first header (ES-5 main panel)
-    const float *in2 = IN(1); // second header
-    const float *in3 = IN(2); // third header
-    const float *in4 = IN(3); // fourth header
-    const float *in5 = IN(4); // fifth header
-    const float *in6 = IN(5); // sixth header
+    const float *ES5header1 = IN(0); // first header (ES-5 main panel)
+    const float *ES5header2 = IN(1); // second header
+    const float *ES5header3 = IN(2); // third header
+    const float *ES5header4 = IN(3); // fourth header
+    const float *ES5header5 = IN(4); // fifth header
+    const float *ES5header6 = IN(5); // sixth header
 
-    float *outES3_7 = OUT(0); //  "left" output, ie ch7, drives headers 1,2,3
-    float *outES3_8 = OUT(1); //  "right" output, ie ch8, drives headers 4,5,6
+    float *ES3ch7 = OUT(0); //  "left" output, ie ch7, drives headers 1,2,3
+    float *ES3ch8 = OUT(1); //  "right" output, ie ch8, drives headers 4,5,6
 
     // Loop through samples and do the computation. *for* loop given in template
     // ***pd version uses a *while* loop
@@ -90,13 +90,13 @@ static void ES5Encoder_next(ES5Encoder* unit, int inNumSamples) {
 		 *  UInt32 out4 = (UInt32)( std::max( 0.0f, std::min( 255.0f, *in4++ ) ) );
 		 *  UInt32 out5 = (UInt32)( std::max( 0.0f, std::min( 255.0f, *in5++ ) ) );
 		 *  UInt32 out6 = (UInt32)( std::max( 0.0f, std::min( 255.0f, *in6++ ) ) ); */
-        //this ugen will use a clampByte helper
-        uint32_t h1 = clampByte(in1[i]);
-        uint32_t h2 = clampByte(in2[i]);
-        uint32_t h3 = clampByte(in3[i]);
-        uint32_t h4 = clampByte(in4[i]);
-        uint32_t h5 = clampByte(in5[i]);
-        uint32_t h6 = clampByte(in6[i]);
+        //this ugen uses a clampByte helper instead
+        uint32_t h1 = clampByte(ES5header1[i]);
+        uint32_t h2 = clampByte(ES5header2[i]);
+        uint32_t h3 = clampByte(ES5header3[i]);
+        uint32_t h4 = clampByte(ES5header4[i]);
+        uint32_t h5 = clampByte(ES5header5[i]);
+        uint32_t h6 = clampByte(ES5header6[i]);
 
         //Bit Packing: create the 24-bit word (N.B. 3 for each of ch7/left and ch8/right)
         //Input 1 is shifted left by 16 bits (filling the top 8 bits).
@@ -114,10 +114,9 @@ static void ES5Encoder_next(ES5Encoder* unit, int inNumSamples) {
 		 *  float floatR = ES_BITSTOFLOAT( bitsR );
 		 *  *dstpL++ = floatL;
 		 *  *dstpR++ = floatR; */    
-        outES3_7[i] = bitsToFloat24( bitsL );
-		outES3_8[i] = bitsToFloat24( bitsR );
+        ES3ch7[i] = bitsToFloat24( bitsL );
+		ES3ch8[i] = bitsToFloat24( bitsR );
 
-        
     }
 }
 
@@ -128,5 +127,5 @@ PluginLoad(ESPlugins) {
     // InterfaceTable *inTable implicitly given as argument to the load function
     ft = inTable; // store pointer to InterfaceTable
     // DefineSimpleUnit is one of four macros defining different kinds of ugens
-//***********COMMENTED OUT TO ALLOW IDE ERROR CHECKING    DefineSimpleUnit(ES5Encoder);
+    DefineSimpleUnit(ES5Encoder);
 }

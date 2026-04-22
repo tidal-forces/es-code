@@ -1,9 +1,15 @@
 ES5Encoder : MultiOutUGen {
-    *ar { |in1=0, in2=0, in3=0, in4=0, in5=0, in6=0|
-        ^this.multiNew('audio', in1, in2, in3, in4, in5, in6)
+
+    *ar { |es5Header1=0, es5Header2=0, es5Header3=0, es5Header4=0, es5Header5=0, es5Header6=0|
+        ^this.multiNew(
+            'audio',
+            es5Header1, es5Header2, es5Header3,
+            es5Header4, es5Header5, es5Header6
+        )
     }
 
-    initOutputs {
+    init {
         ^this.initOutputs(2, rate)
     }
+
 }
