@@ -46,10 +46,13 @@ static inline uint32_t clampByte(float x) {
  *  #define ES_BITSTOFLOAT( bits )	\
  *  	( ( bits & 0x800000 ) ? ( (((float)(0xffffff&(-(SInt32)(bits)))) / btf_n_factor ) ) : ( ((float)(bits)) / btf_p_factor ) ) */
 static inline float bitsToFloat24(uint32_t bits) {
-    float btf_n_factor, btf_p_factor;
-    btf_n_factor = -(float)0x800000;			
-    btf_p_factor = (float)0x800000;
-    //TODO: STUB
+    const float btf_n_factor = -(float)0x800000;			
+    const float btf_p_factor = (float)0x800000;
+    if ( bits & 0x800000u ) {
+        return ((float)(0x00ffffffu&(-(int32_t)(bits)))) / btf_n_factor;
+    } else {
+        return ((float)(bits)) / btf_p_factor;
+    } 
 }
 
 //**********_CALCULATION_FXN_*************************************************************************************
