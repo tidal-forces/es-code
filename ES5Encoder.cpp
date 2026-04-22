@@ -24,9 +24,17 @@ void ES5Encoder_Ctor(ES5Encoder* unit) {
 }
 //**********_HELPERS_*************************************************************************************
 
-//clampByte helper: ensure the incoming signals are kept strictly between 0 and 255 ... etc... 
+//clampByte helper: ensure the incoming signals are kept strictly between 0 and 255 (NB uint32 stil preferred
+//due to subsequent bitwise ops) and convert them to integers (uint32). 
 static inline uint32_t clampByte(float x) {
     //TODO: STUB
+    if (x < 0.f) {
+        return 0;
+    }
+    if (x > 255.f) {
+        return 255;
+    }
+    return static_cast<uint32_t>(x);
 }
 
 //bit-to-float conversion helper: trick audio interface DAC into outputting the exact 24-bit digital word

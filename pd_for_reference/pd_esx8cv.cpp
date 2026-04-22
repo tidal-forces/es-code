@@ -42,7 +42,7 @@ typedef struct _esx8cvencoder {
 	t_inlet*		m_in[7];	// inlets 2-8. inlet 1 is created by CLASS_MAINSIGNALIN
 	t_outlet*		m_out[1];
 } t_esx8cvencoder;
-
+/*
 // method prototypes
 extern "C" {
 void esx8cvencoder_tilde_setup(void);
@@ -101,9 +101,9 @@ void esx8cvencoder_dsp(t_esx8cvencoder *x, t_signal **sp)
 }
 
 //***********************************************************************************************
-
+*/
 t_int *esx8cvencoder_perform(t_int *w)
-{
+{/*
 	t_esx8cvencoder *x = (t_esx8cvencoder *)(w[1]);
 	t_float* srcp[8];
 	srcp[0] = (t_float *)(w[2]);
@@ -116,7 +116,7 @@ t_int *esx8cvencoder_perform(t_int *w)
 	srcp[7] = (t_float *)(w[9]);
 	t_float *dstp = (t_float *)(w[10]);
 	long n = (long)(w[11]);
-
+ */
 	int phase = x->m_phase;
 	UInt32 value = x->m_value;
 	bool smuxProof = false;
