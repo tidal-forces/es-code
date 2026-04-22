@@ -3,7 +3,8 @@
         {
             "name": "Mac",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "/Users/tg/supercollider/include/**"
             ],
             "defines": [],
             "cStandard": "c17",
