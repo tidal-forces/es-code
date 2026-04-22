@@ -85,7 +85,12 @@ void ES5Encoder_next(ES5Encoder* unit, int inNumSamples) {
 		 *  UInt32 out5 = (UInt32)( std::max( 0.0f, std::min( 255.0f, *in5++ ) ) );
 		 *  UInt32 out6 = (UInt32)( std::max( 0.0f, std::min( 255.0f, *in6++ ) ) ); */
         //this ugen will use a clampByte helper
-    //TODO: STUB
+        uint32_t h1 = clampByte(in1[i]);
+        uint32_t h2 = clampByte(in2[i]);
+        uint32_t h3 = clampByte(in3[i]);
+        uint32_t h4 = clampByte(in4[i]);
+        uint32_t h5 = clampByte(in5[i]);
+        uint32_t h6 = clampByte(in6[i]);
 
         //Bit Packing: create the 24-bit word (N.B. 3 for each of ch7/left and ch8/right)
         //Input 1 is shifted left by 16 bits (filling the top 8 bits).
@@ -94,7 +99,8 @@ void ES5Encoder_next(ES5Encoder* unit, int inNumSamples) {
         //***pd:
 		/*  SInt32 bitsL = ( out1 << 16 ) | ( out2 << 8 ) | out3;
 		 *  SInt32 bitsR = ( out4 << 16 ) | ( out5 << 8 ) | out6; */
-    //TODO: STUB
+        uint32_t bitsL = ( h1 << 16 ) | ( h2 << 8 ) | h3;
+		uint32_t bitsR = ( h4 << 16 ) | ( h5 << 8 ) | h6; 
 
         //DSP Loop: process audio in "blocks" (arrays of samples) rather than one sample at a time
         // ***pd uses pointer arithmetic (*in1++ / *dstpL++) moving pointer forward in memory w/ while loop
