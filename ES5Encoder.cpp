@@ -68,8 +68,8 @@ void ES5Encoder_next(ES5Encoder* unit, int inNumSamples) {
     const float *in5 = IN(4); // fifth header
     const float *in6 = IN(5); // sixth header
 
-    float *out7 = OUT(0); //  "left" output, ie ch7, drives headers 1,2,3
-    float *out8 = OUT(1); //  "right" output, ie ch8, drives headers 4,5,6
+    float *outES3_7 = OUT(0); //  "left" output, ie ch7, drives headers 1,2,3
+    float *outES3_8 = OUT(1); //  "right" output, ie ch8, drives headers 4,5,6
 
     // Loop through samples and do the computation. *for* loop given in template
     // ***pd version uses a *while* loop
@@ -107,8 +107,9 @@ void ES5Encoder_next(ES5Encoder* unit, int inNumSamples) {
         /*  float floatL = ES_BITSTOFLOAT( bitsL );
 		 *  float floatR = ES_BITSTOFLOAT( bitsR );
 		 *  *dstpL++ = floatL;
-		 *  *dstpR++ = floatR; */
-    //TODO: STUB
+		 *  *dstpR++ = floatR; */    
+        outES3_7[i] = bitsToFloat24( bitsL );
+		outES3_8[i] = bitsToFloat24( bitsR );
 
         
     }
