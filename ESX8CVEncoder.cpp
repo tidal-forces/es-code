@@ -14,7 +14,7 @@ static void ESX8CVEncoder_Ctor(ESX8CVEncoder* unit);
 
 // the constructor function is called when a Synth containing this ugen is played.
 // it MUST be named "PluginName_Ctor", and the argument must be "unit."
-static void ESX8CVEncoder_Ctor(ESX8CVEncoder* unit) {
+void ESX8CVEncoder_Ctor(ESX8CVEncoder* unit) {
     // initialize state variables here.
     // set a calculation function. for now, we only have one calculation function.
     SETCALC(ESX8CVEncoder_next);
