@@ -1,4 +1,5 @@
 #include "SC_PlugIn.h"
+#include <cstdint>
 
 // InterfaceTable contains pointers to functions in the host (server).
 static InterfaceTable *ft;
@@ -14,7 +15,7 @@ static void ES5Encoder_Ctor(ES5Encoder* unit);
 
 // the constructor function is called when a Synth containing this ugen is played.
 // it MUST be named "PluginName_Ctor", and the argument must be "unit."
-void ES5Encoder_Ctor(ES5Encoder* unit) {
+static void ES5Encoder_Ctor(ES5Encoder* unit) {
     // initialize state variables here.
     // set a calculation function. for now, we only have one calculation function.
     SETCALC(ES5Encoder_next);
@@ -60,7 +61,7 @@ static inline float bitsToFloat24(uint32_t bits) {
 // the calculation function can have any name, but this is conventional. the first argument must be "unit."
 // this function is called every control period (64 samples is typical)
 // Don't change the names of the arguments, or the helper macros won't work.
-void ES5Encoder_next(ES5Encoder* unit, int inNumSamples) {
+static void ES5Encoder_next(ES5Encoder* unit, int inNumSamples) {
 
     // IN and OUT are helper macros that return audio-rate input and output buffers. These are known as "wire buffers."
 
