@@ -27,7 +27,6 @@ void ES5Encoder_Ctor(ES5Encoder* unit) {
 //clampByte helper: ensure the incoming signals are kept strictly between 0 and 255 (NB uint32 stil preferred
 //due to subsequent bitwise ops) and convert them to integers (uint32). 
 static inline uint32_t clampByte(float x) {
-    //TODO: STUB
     if (x < 0.f) {
         return 0;
     }
@@ -47,6 +46,9 @@ static inline uint32_t clampByte(float x) {
  *  #define ES_BITSTOFLOAT( bits )	\
  *  	( ( bits & 0x800000 ) ? ( (((float)(0xffffff&(-(SInt32)(bits)))) / btf_n_factor ) ) : ( ((float)(bits)) / btf_p_factor ) ) */
 static inline float bitsToFloat24(uint32_t bits) {
+    float btf_n_factor, btf_p_factor;
+    btf_n_factor = -(float)0x800000;			
+    btf_p_factor = (float)0x800000;
     //TODO: STUB
 }
 
@@ -122,5 +124,5 @@ PluginLoad(ESPlugins) {
     // InterfaceTable *inTable implicitly given as argument to the load function
     ft = inTable; // store pointer to InterfaceTable
     // DefineSimpleUnit is one of four macros defining different kinds of ugens
-//***********COMMENTED TO ALLOW IDE ERROR CHECKING    DefineSimpleUnit(ES5Encoder);
+//***********COMMENTED OUT TO ALLOW IDE ERROR CHECKING    DefineSimpleUnit(ES5Encoder);
 }
