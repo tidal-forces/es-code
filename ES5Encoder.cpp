@@ -43,18 +43,66 @@ void ES5Encoder_next(ES5Encoder* unit, int inNumSamples) {
     float *out7 = OUT(0); //  "left" output, ie ch7, drives headers 1,2,3
     float *out8 = OUT(1); //  "right" output, ie ch8, drives headers 4,5,6
 
-    // Loop through samples and do the computation.
+    // Loop through samples and do the computation. *for* loop given in template
+    // ***pd version uses a *while* loop
+    // while (n--) & uses pointer arithmetic (*in1++ and *dstpL++)
     for (int i = 0; i < inNumSamples; i++) {
-        //out[i] = (left[i] + right[i]) * 0.5;
+
+        //Clamp: ensure the incoming signals are kept strictly between 0 and 255 (an 8-bit byte) 
+        //and convert them to integers. ***pd:
+        /*  UInt32 out1 = (UInt32)( std::max( 0.0f, std::min( 255.0f, *in1++ ) ) );
+		 *  UInt32 out2 = (UInt32)( std::max( 0.0f, std::min( 255.0f, *in2++ ) ) );
+		 *  UInt32 out3 = (UInt32)( std::max( 0.0f, std::min( 255.0f, *in3++ ) ) );
+		 *  UInt32 out4 = (UInt32)( std::max( 0.0f, std::min( 255.0f, *in4++ ) ) );
+		 *  UInt32 out5 = (UInt32)( std::max( 0.0f, std::min( 255.0f, *in5++ ) ) );
+		 *  UInt32 out6 = (UInt32)( std::max( 0.0f, std::min( 255.0f, *in6++ ) ) ); */
+        //this ugen will use a clampByte helper
+
+
+        //Bit Packing: create the 24-bit word (N.B. 3 for each of ch7/left and ch8/right)
+        //Input 1 is shifted left by 16 bits (filling the top 8 bits).
+        //Input 2 is shifted left by 8 bits (filling the middle 8 bits).
+        //Input 3 stays where it is (filling the bottom 8 bits).
+        //***pd:
+		/*  SInt32 bitsL = ( out1 << 16 ) | ( out2 << 8 ) | out3;
+		 *  SInt32 bitsR = ( out4 << 16 ) | ( out5 << 8 ) | out6; */
+
+
+        //DSP Loop: process audio in "blocks" (arrays of samples) rather than one sample at a time
+        // ***pd uses pointer arithmetic (*in1++ / *dstpL++) moving pointer forward in memory w/ while loop
+        /*  float floatL = ES_BITSTOFLOAT( bitsL );
+		 *  float floatR = ES_BITSTOFLOAT( bitsR );
+
+		 *  *dstpL++ = floatL;
+		 *  *dstpR++ = floatR; */
+
+
+        
     }
 }
 
+//clampByte helper: ensure the incoming signals are kept strictly between 0 and 255 ... etc... 
+uint32_t clampByte(float x) {
+    //STUB
+}
 
+//bit-to-float conversion helper: trick audio interface DAC into outputting the exact 24-bit digital word
+//instead of normal 32-bit floating-point numbers (-1.0 to 1.0)
+// ***seems the pd version used preprocessor macros for this!!!
+/*  #define ES_BITSTOFLOAT_SETUP()								\
+ *  	float btf_n_factor, btf_p_factor;						\
+ *  	btf_n_factor = -(float)0x800000;			btf_p_factor = (float)0x800000;
+
+ *  #define ES_BITSTOFLOAT( bits )	\
+ *  	( ( bits & 0x800000 ) ? ( (((float)(0xffffff&(-(SInt32)(bits)))) / btf_n_factor ) ) : ( ((float)(bits)) / btf_p_factor ) ) */
+float bitsToFloat24(uint32_t bits) {
+    //STUB
+}
 
 // the entry point is called by the host when the plug-in is loaded
 PluginLoad(ESPlugins) {
     // InterfaceTable *inTable implicitly given as argument to the load function
     ft = inTable; // store pointer to InterfaceTable
     // DefineSimpleUnit is one of four macros defining different kinds of ugens
-//COMMENTED TO ALLOW FURTHER ERROR CHECKING    DefineSimpleUnit(ES5Encoder);
+//***********COMMENTED TO ALLOW IDE ERROR CHECKING    DefineSimpleUnit(ES5Encoder);
 }

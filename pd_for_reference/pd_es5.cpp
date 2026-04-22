@@ -38,10 +38,10 @@ typedef signed long                     SInt32;
 
 #define ES_BITSTOFLOAT( bits )	\
 	( ( bits & 0x800000 ) ? ( (((float)(0xffffff&(-(SInt32)(bits)))) / btf_n_factor ) ) : ( ((float)(bits)) / btf_p_factor ) )
-
+/* 
 #define ES_FLOATTOBITS( f )		\
 	( ( f < 0 ) ? ( 0x800000 | ( 0xffffff & -(SInt32)( (f) * btf_n_factor ) ) ) : ( (UInt32)( (f) * btf_p_factor ) ) )
-
+ *//* 
 // struct to represent the object's state
 typedef struct _es5encoder {
 	t_object		ob;
@@ -50,7 +50,7 @@ typedef struct _es5encoder {
 	t_inlet*		m_in[5];	// inlets 2-6. inlet 1 is created by CLASS_MAINSIGNALIN
 	t_outlet*		m_out[2];
 } t_es5encoder;
-
+ */
 // method prototypes
 extern "C" {
 void es5encoder_tilde_setup(void);
@@ -64,7 +64,7 @@ t_int *es5encoder_perform(t_int *w);
 static t_class *es5encoder_class = NULL;
 
 //***********************************************************************************************
-
+/* 
 void es5encoder_tilde_setup(void)
 {
 	t_class *c = class_new(gensym("es5encoder~"), (t_newmethod)es5encoder_new, (t_method)es5encoder_free, sizeof(t_es5encoder), CLASS_DEFAULT, A_GIMME, 0);
@@ -125,7 +125,7 @@ t_int *es5encoder_perform(t_int *w)
 		int	m_interfaceCategory;
 	}	m_preCompNoInterp;
 	m_preCompNoInterp.m_interfaceCategory = 0;
-	
+	 */
 	ES_BITSTOFLOAT_SETUP()
 
 	while (n--)
