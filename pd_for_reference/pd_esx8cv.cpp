@@ -145,15 +145,15 @@ t_int *esx8cvencoder_perform(t_int *w)
 			}
 		}
 		
-		phase += phaseInc;
+/* 		phase += phaseInc;
 		if ( ( phase & 7 ) == 6 )
 			phase += 2;
-		phase = phase & 63;
+		phase = phase & 63; */
 		
-		UInt32 out = ( state == 0 ) ? ( 0x80 | ( value & 0x1f ) )
+/* 		UInt32 out = ( state == 0 ) ? ( 0x80 | ( value & 0x1f ) )
 		: ( ( state == 1 ) ? ( ( value >> 5 ) & 0x1f )
 		   : ( ( ( dac > 3 ) ? 0x40 : 0x20 ) | ( value >> 10 ) | ( ( dac & 3 ) << 2 ) ) );
-		
+		 */
 		*dstp++ = (float)out;
 	}
 
