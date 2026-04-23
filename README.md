@@ -25,13 +25,13 @@
 
 
 # compiling locally
-to compile the ugen (mac, sc older version 3.13.0):
+to compile the ugen (my case: mac, older version gui sc):
 
 1. confirm the supercollider version installed on your computer!! (could be gui, whatever)
 2. git clone the supercollider source 
-3. git checkout the version you use (and thusly wish to compile you ugen for)
-4. go to whichever directory you've put the encoders' the cpp and sc 
-5. given I cloned sc source into my home directory, compile as below (e.g. for ES5Encoder)
+3. git checkout the version you use (and thusly wish to compile your ugen for)
+4. go to wherever you've put the encoders' cpp and sc source files
+5. compile as below (e.g. for ES5Encoder, and given I had cloned sc source into my home directory)
 
 ```
 clang++ -O2 -shared -fPIC \
