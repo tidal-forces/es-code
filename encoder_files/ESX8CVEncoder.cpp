@@ -3,7 +3,7 @@
 
 //=============UGEN=BOILERPLATE=================================================================================
 
-// InterfaceTable contains pointers to functions in the host (server).
+// InterfaceTable contains pointers to functions in the host (server)
 static InterfaceTable *ft;
 
 // declare struct to hold unit generator state
@@ -17,28 +17,21 @@ struct ESX8CVEncoder : public Unit {
 static void ESX8CVEncoder_next(ESX8CVEncoder *unit, int inNumSamples);
 static void ESX8CVEncoder_Ctor(ESX8CVEncoder *unit);
 
-// the constructor function is called when a Synth containing this ugen is played.
-// it MUST be named "PluginName_Ctor", and the argument must be "unit."
+// the constructor function is called when a Synth containing this ugen is played
 static void ESX8CVEncoder_Ctor(ESX8CVEncoder *unit) {
     // initialize state variables here.
     unit->mPhase = 0;
     unit->mValue = 0;
-    
-    // set a calculation function. for now, we only have one calculation function.
+    // set a calculation function
     SETCALC(ESX8CVEncoder_next);
-
-    // calculate one sample of output.
-    // if you don't do this, downstream ugens might access garbage memory in their Ctor functions.
+    // calculate one sample of output
     ESX8CVEncoder_next(unit, 1);
 }
 
 //=============HELPER=FXNS=================================================================================
 
-// helper for the clamp; ensures the CV data is 12-bit (3 bytes per DAC = 24 transmitted bits - overhead)
-// from BitSlicer note 5 + 5 + 2 = 12: bits reserved for CV
+// Clamp helper. ensures CV data is 12-bit (3 bytes per DAC = 24 transmitted bits - overhead)
 static inline uint32_t clampValueTo12BitCV(double s) {
-    /* double s = values[dac];
-    value = 2048 + (int32_t)(std::max(-2048.0, std::min(2047.0, s))); */
     if (s < -2048.0) {
         s = -2048.0;
     } else if (s > 2047.0) {
@@ -48,11 +41,7 @@ static inline uint32_t clampValueTo12BitCV(double s) {
     return 2048 + (int32_t)s;
 }
 
-// BitSlicer for output
-/*  *** directly from pd (obfuscated code? or just really compact?):
-     *  uint32_t out = ( state == 0 ) ? ( 0x80 | ( value & 0x1f ) )
-     *  	: ( ( state == 1 ) ? ( ( value >> 5 ) & 0x1f )
-     *  	   : ( ( ( dac > 3 ) ? 0x40 : 0x20 ) | ( value >> 10 ) | ( ( dac & 3 ) << 2 ) ) ); */
+// Bit slicer helper
 static inline uint32_t encodeOutputBits(int state, uint32_t value, int dac) {
     if (state == 0) {                   // first packet marker
         uint32_t low5bits = value & 0x1f;
@@ -76,11 +65,6 @@ static inline uint32_t encodeOutputBits(int state, uint32_t value, int dac) {
 }
 
 // helper to tick through phases (N.B.: no phase 4)
-/*  ***pd version makes heavy use of side effcts:
- *      phase += phaseInc;
- *      if ( ( phase & 7 ) == 6 )
- *      	phase += 2;
- *      phase = phase & 63; */
 static inline int returnNextPhase(int phase, int phaseInc) {
     const uint32_t low3Mask = 7;
     const uint32_t skippedResidue = 6;
@@ -96,16 +80,13 @@ static inline int returnNextPhase(int phase, int phaseInc) {
 
 //=============CALCULATION=FXN=================================================================================
 
-// the calculation function can have any name, but this is conventional. the first argument must be "unit."
-// this function is called every control period - i.e. every server block (typically 64 samples)
-//(8 DACs × 3 samples each = 24 per full cycle)
+// this function is called every control period 
 static void ESX8CVEncoder_next(ESX8CVEncoder *unit, int inNumSamples) {
 
     int phase = unit->mPhase;
     uint32_t value = unit->mValue;
 
-    // scsynth saves memory by aliasing wire buffers. In this case, "out" and "left" are the same. You should either
-    // be mindful of this behavior or turn it off in the PluginLoad section.
+    // IN and OUT are helper macros that return audio-rate input and output buffers
     const float *ESX8CVdac1 = IN(0); // first dac channel (ESX-8CV jack labeled "1")
     const float *ESX8CVdac2 = IN(1); // second dac ch
     const float *ESX8CVdac3 = IN(2); // third dac ch
@@ -119,25 +100,11 @@ static void ESX8CVEncoder_next(ESX8CVEncoder *unit, int inNumSamples) {
 
     double values[8];
 
-    // from pd code, to prevent issues with SMUX (?)
-    /* bool smuxProof = false;
-	 *  if ( !smuxProof )
-	 *  	phase = phase & ~1;
-	 *  int phaseInc = smuxProof ? 1 : 2; */
-    /* bool smuxProof = false;
-    //my code:
-    if (!smuxProof) {
-        phase = phase & ~1;
-    }
-    int phaseInc = 2;
-    if (smuxProof) { 
-        phaseInc = 1;
-    } */
-    //no need for this since will never SMUX in tidal/ sc
+    // set phase to even number
     phase = phase & ~1;
     const int phaseInc = 2;
 
-    // Loop through samples and do the computation for out!
+    // loop through samples and do the computation for out
     for (int i = 0; i < inNumSamples; i++) {
 
         values[0] = ESX8CVdac1[i];
@@ -149,8 +116,7 @@ static void ESX8CVEncoder_next(ESX8CVEncoder *unit, int inNumSamples) {
         values[6] = ESX8CVdac7[i];
         values[7] = ESX8CVdac8[i];
 
-        // Phase Tracker
-        //  use bitwise math to extract two different counters from a single phase number
+        // Phase tracker, use bitwise math to extract two counters from single phase number
         int state = (phase >> 1) & 3;
         int dac = (phase >> 3) & 7;
 
@@ -159,15 +125,15 @@ static void ESX8CVEncoder_next(ESX8CVEncoder *unit, int inNumSamples) {
             value = clampValueTo12BitCV(values[dac]);
         }
 
-        // Bit slicer for output
+        // Bit slicer to output
         uint32_t outBits = encodeOutputBits(state, value, dac);
-
         ES5headerX[i] = (float)outBits;
 
+        // Tick to next phase
         phase = returnNextPhase(phase, phaseInc);
 
     }
-    // save the new state re phase and value
+    // save the new ugen state re: phase and value
     unit->mPhase = phase;
     unit->mValue = value;
 }
@@ -176,9 +142,6 @@ static void ESX8CVEncoder_next(ESX8CVEncoder *unit, int inNumSamples) {
 
 // the entry point is called by the host when the plug-in is loaded
 PluginLoad(ESPlugins) {
-    // InterfaceTable *inTable implicitly given as argument to the load function
     ft = inTable; // store pointer to InterfaceTable
-    // DefineSimpleUnit is one of four macros defining different kinds of ugens
-    //******DON"T FORGET uncomment before compiling!!!!  
-    DefineSimpleUnit(ESX8CVEncoder);  //comment out if need VS code to check errors
+    DefineSimpleUnit(ESX8CVEncoder);  //comment out if interfering w/ VS code error highlighting
 }
