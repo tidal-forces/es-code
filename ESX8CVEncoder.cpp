@@ -19,7 +19,7 @@ static void ESX8CVEncoder_Ctor(ESX8CVEncoder *unit);
 
 // the constructor function is called when a Synth containing this ugen is played.
 // it MUST be named "PluginName_Ctor", and the argument must be "unit."
-void ESX8CVEncoder_Ctor(ESX8CVEncoder *unit) {
+static void ESX8CVEncoder_Ctor(ESX8CVEncoder *unit) {
     // initialize state variables here.
     unit->mPhase = 0;
     unit->mValue = 0;
@@ -91,15 +91,15 @@ static inline int returnNextPhase(int phase, int phaseInc) {
     if ((nextPhase & low3Mask) == skippedResidue) {
         nextPhase += skipAmount;
     }
-    phase = nextPhase & phaseWrapMask;
+    return nextPhase & phaseWrapMask;
 }
 
 //=============CALCULATION=FXN=================================================================================
 
 // the calculation function can have any name, but this is conventional. the first argument must be "unit."
-// this function is called every control period (24 samples)
+// this function is called every control period - i.e. every server block (typically 64 samples)
 //(8 DACs × 3 samples each = 24 per full cycle)
-void ESX8CVEncoder_next(ESX8CVEncoder *unit, int inNumSamples) {
+static void ESX8CVEncoder_next(ESX8CVEncoder *unit, int inNumSamples) {
 
     int phase = unit->mPhase;
     uint32_t value = unit->mValue;
@@ -124,14 +124,18 @@ void ESX8CVEncoder_next(ESX8CVEncoder *unit, int inNumSamples) {
 	 *  if ( !smuxProof )
 	 *  	phase = phase & ~1;
 	 *  int phaseInc = smuxProof ? 1 : 2; */
-    bool smuxProof = false;
+    /* bool smuxProof = false;
+    //my code:
     if (!smuxProof) {
         phase = phase & ~1;
     }
     int phaseInc = 2;
     if (smuxProof) { 
         phaseInc = 1;
-    }
+    } */
+    //no need for this since will never SMUX in tidal/ sc
+    phase = phase & ~1;
+    const int phaseInc = 2;
 
     // Loop through samples and do the computation for out!
     for (int i = 0; i < inNumSamples; i++) {
@@ -175,5 +179,5 @@ PluginLoad(ESPlugins) {
     // InterfaceTable *inTable implicitly given as argument to the load function
     ft = inTable; // store pointer to InterfaceTable
     // DefineSimpleUnit is one of four macros defining different kinds of ugens
-    //******DON"T FORGET!!!!  DefineSimpleUnit(ESX8CVEncoder);  //comment out if need VS code to check errors
+    //******DON"T FORGET uncomment before compiling!!!!  DefineSimpleUnit(ESX8CVEncoder);  //comment out if need VS code to check errors
 }
