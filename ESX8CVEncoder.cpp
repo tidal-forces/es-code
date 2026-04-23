@@ -179,5 +179,6 @@ PluginLoad(ESPlugins) {
     // InterfaceTable *inTable implicitly given as argument to the load function
     ft = inTable; // store pointer to InterfaceTable
     // DefineSimpleUnit is one of four macros defining different kinds of ugens
-    //******DON"T FORGET uncomment before compiling!!!!  DefineSimpleUnit(ESX8CVEncoder);  //comment out if need VS code to check errors
+    //******DON"T FORGET uncomment before compiling!!!!  
+    DefineSimpleUnit(ESX8CVEncoder);  //comment out if need VS code to check errors
 }
