@@ -7,17 +7,7 @@ d1 $ s "tidal_cv_ping" # port 0 # cv_val "<0.1 0.5 0.8 0.2>"
 
 
 
-Tidal Cycles
-     │
-     ▼
-SuperDirt (SC)
-     │
-     ├── channels 1-6 ──► ES-3 direct ──► CV/gate (superdirt-voltage handles this)
-     │
-     ├── channel 7 ──► ES5Encoder UGen ──► ES-5 headers 1/2/3
-     │                      │                   └── ESX-8GT (sclang bit packing)
-     └── channel 8 ──► ES5Encoder UGen ──► ES-5 headers 4/5/6
-                            │                   └── ESX8CVEncoder UGen
+
 
 d1 $ s "es5gate" # g1 "1 0 1 0" # g2 "0 1 0 1"
 
