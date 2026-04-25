@@ -1,9 +1,3 @@
-/* 8 CV inputs
-- each CV value becomes a 12-bit value
-- each DAC update is split over 3 es-5 bytes
-- phase tracks which byte/state, which DAC
-- one encoded byte is output per sample */
-
 #include "SC_PlugIn.h"
 #include <cstdint>
 
@@ -13,25 +7,25 @@
 static InterfaceTable *ft;
 
 // declare struct to hold unit generator state
-struct esX8CVEncoder : public Unit {
+struct ESX8CVEncoder : public Unit {
     // declare state variables here.
     int mPhase;
     uint32_t mValue;
 };
 
 // function declarations
-static void esX8CVEncoder_next(esX8CVEncoder *unit, int inNumSamples);
-static void esX8CVEncoder_Ctor(esX8CVEncoder *unit);
+static void ESX8CVEncoder_next(ESX8CVEncoder *unit, int inNumSamples);
+static void ESX8CVEncoder_Ctor(ESX8CVEncoder *unit);
 
 // the constructor function is called when a Synth containing this ugen is played
-static void esX8CVEncoder_Ctor(esX8CVEncoder *unit) {
+static void ESX8CVEncoder_Ctor(ESX8CVEncoder *unit) {
     // initialize state variables here.
     unit->mPhase = 0;
     unit->mValue = 0;
     // set a calculation function
-    SETCALC(esX8CVEncoder_next);
+    SETCALC(ESX8CVEncoder_next);
     // calculate one sample of output
-    esX8CVEncoder_next(unit, 1);
+    ESX8CVEncoder_next(unit, 1);
 }
 
 //=============HELPER=FXNS=================================================================================
@@ -70,7 +64,7 @@ static inline uint32_t encodeOutputBits(int state, uint32_t value, int dac) {
     }
 }
 
-// helper to tick through phases (N.B.: no phase 4, i.e. skips state == 3 for each DAC)
+// helper to tick through phases (N.B.: no phase 4)
 static inline int returnNextPhase(int phase, int phaseInc) {
     const uint32_t low3Mask = 7;
     const uint32_t skippedResidue = 6;
@@ -87,22 +81,22 @@ static inline int returnNextPhase(int phase, int phaseInc) {
 //=============CALCULATION=FXN=================================================================================
 
 // this function is called every control period 
-static void esX8CVEncoder_next(esX8CVEncoder *unit, int inNumSamples) {
+static void ESX8CVEncoder_next(ESX8CVEncoder *unit, int inNumSamples) {
 
     int phase = unit->mPhase;
     uint32_t value = unit->mValue;
 
     // IN and OUT are helper macros that return audio-rate input and output buffers
-    const float *esX8CVdac1 = IN(0); // first dac channel (esX-8CV jack labeled "1")
-    const float *esX8CVdac2 = IN(1); // second dac ch
-    const float *esX8CVdac3 = IN(2); // third dac ch
-    const float *esX8CVdac4 = IN(3); // fourth dac ch
-    const float *esX8CVdac5 = IN(4); // fifth dac ch
-    const float *esX8CVdac6 = IN(5); // sixth dac ch
-    const float *esX8CVdac7 = IN(6); // seventh dac ch
-    const float *esX8CVdac8 = IN(7); // eighth dac ch
+    const float *ESX8CVdac1 = IN(0); // first dac channel (ESX-8CV jack labeled "1")
+    const float *ESX8CVdac2 = IN(1); // second dac ch
+    const float *ESX8CVdac3 = IN(2); // third dac ch
+    const float *ESX8CVdac4 = IN(3); // fourth dac ch
+    const float *ESX8CVdac5 = IN(4); // fifth dac ch
+    const float *ESX8CVdac6 = IN(5); // sixth dac ch
+    const float *ESX8CVdac7 = IN(6); // seventh dac ch
+    const float *ESX8CVdac8 = IN(7); // eighth dac ch
 
-    float *es5headerX = OUT(0); //  send to es5
+    float *ES5headerX = OUT(0); //  send to ES5
 
     double values[8];
 
@@ -113,14 +107,14 @@ static void esX8CVEncoder_next(esX8CVEncoder *unit, int inNumSamples) {
     // loop through samples and do the computation for out
     for (int i = 0; i < inNumSamples; i++) {
 
-        values[0] = esX8CVdac1[i];
-        values[1] = esX8CVdac2[i];
-        values[2] = esX8CVdac3[i];
-        values[3] = esX8CVdac4[i];
-        values[4] = esX8CVdac5[i];
-        values[5] = esX8CVdac6[i];
-        values[6] = esX8CVdac7[i];
-        values[7] = esX8CVdac8[i];
+        values[0] = ESX8CVdac1[i];
+        values[1] = ESX8CVdac2[i];
+        values[2] = ESX8CVdac3[i];
+        values[3] = ESX8CVdac4[i];
+        values[4] = ESX8CVdac5[i];
+        values[5] = ESX8CVdac6[i];
+        values[6] = ESX8CVdac7[i];
+        values[7] = ESX8CVdac8[i];
 
         // Phase tracker, use bitwise math to extract two counters from single phase number
         int state = (phase >> 1) & 3;
@@ -133,7 +127,7 @@ static void esX8CVEncoder_next(esX8CVEncoder *unit, int inNumSamples) {
 
         // Bit slicer to output
         uint32_t outBits = encodeOutputBits(state, value, dac);
-        es5headerX[i] = (float)outBits;
+        ES5headerX[i] = (float)outBits;
 
         // Tick to next phase
         phase = returnNextPhase(phase, phaseInc);
@@ -147,7 +141,7 @@ static void esX8CVEncoder_next(esX8CVEncoder *unit, int inNumSamples) {
 //=============UGEN=BOILERPLATE=================================================================================
 
 // the entry point is called by the host when the plug-in is loaded
-PluginLoad(esPlugins) {
+PluginLoad(ESPlugins) {
     ft = inTable; // store pointer to InterfaceTable
-    DefineSimpleUnit(esX8CVEncoder);  //comment out if interfering w/ VS code error highlighting
+    DefineSimpleUnit(ESX8CVEncoder);  //comment out if interfering w/ VS code error highlighting
 }

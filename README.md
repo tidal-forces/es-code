@@ -6,19 +6,23 @@ we've all dreamed of controlling our modular rigs with tidal cycles at least onc
 here is an intermediate step that allows you to transform your CV and gate output into actual voltages, via Expert Sleepers' <link, description...>
 
 overall picture...
+```
 Tidal Cycles
-     │
-     ▼
+  │
+  ▼
 SuperDirt (SC)
-     │
-     ├── channels 1-6 ──► ES-3 direct ──► CV/gate (superdirt-voltage handles this)
-     │
-     ├── channel 7 ──► ES5Encoder UGen ──► ES-5 headers 1/2/3
-     │                      │                   └── ESX-8GT (sclang bit packing)
-     │                      │                   └── ESX8CVEncoder UGen
-     └── channel 8 ──► ES5Encoder UGen ──► ES-5 headers 4/5/6
-     │                      │                   └── ESX-8GT (sclang bit packing)
-     │                      │                   └── ESX8CVEncoder UGen
+  │
+  ├── channels 1-6 ──► ES-3 direct
+  │                      └── CV/gate (superdirt-voltage)
+  │                      └── audio out (superdirt samples)
+  │
+  ├── channel 7 ──► ES5Encoder UGen ──► ES-5 headers 1/2/3
+  │                      │              └── ESX-8GT (pseudo UGen)
+  │                      │              └── ESX8CVEncoder (UGen)
+  └── channel 8 ──► ES5Encoder UGen ──► ES-5 headers 4/5/6
+  │                      │              └── ESX-8GT (pseudo UGen)
+  │                      │              └── ESX8CVEncoder (UGen)
+```
 
 overall setup process...
 
