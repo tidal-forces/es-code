@@ -21,7 +21,10 @@ static void ES5Encoder_Ctor(ES5Encoder* unit) {
     // set a calculation function
     SETCALC(ES5Encoder_next);
     // calculate one sample of output
-    ES5Encoder_next(unit, 1);
+    //**because still crashing? ES5Encoder_next(unit, 1);
+    //MultiOutUGen  output buffer state unsafe??
+    OUT0(0) = 0.f;
+    OUT0(1) = 0.f;
 }
 //**********_HELPERS_********************************************************************************
 
@@ -60,17 +63,20 @@ static inline float bitsToFloat24(uint32_t bits) {
 
 // this function is called every control period 
 static void ES5Encoder_next(ES5Encoder* unit, int inNumSamples) {
+    //because crashing?
+    float *es3ch7 = OUT(0);
+    float *es3ch8 = OUT(1);
 
-    // IN and OUT are helper macros that return audio-rate input and output buffers
+    /* // IN and OUT are helper macros that return audio-rate input and output buffers
     const float *es5header1 = IN(0); // first header (es-5 main panel)
     const float *es5header2 = IN(1); // second header
     const float *es5header3 = IN(2); // third header
     const float *es5header4 = IN(3); // fourth header
     const float *es5header5 = IN(4); // fifth header
-    const float *es5header6 = IN(5); // sixth header
+    const float *es5header6 = IN(5); // sixth header */
 
-    float *es3ch7 = OUT(0); //  "left" output, ie ch7, drives headers 1,2,3
-    float *es3ch8 = OUT(1); //  "right" output, ie ch8, drives headers 4,5,6
+    /* float *es3ch7 = OUT(0); //  "left" output, ie ch7, drives headers 1,2,3
+    float *es3ch8 = OUT(1); //  "right" output, ie ch8, drives headers 4,5,6 */
 
     // Loop through samples and do the computation. *for* loop given in template
     for (int i = 0; i < inNumSamples; i++) {
