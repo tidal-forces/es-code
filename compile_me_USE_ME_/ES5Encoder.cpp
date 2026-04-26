@@ -104,8 +104,15 @@ static void ES5Encoder_next(ES5Encoder* unit, int inNumSamples) {
         es3ch7[i] = bitsToFloat24( bitsL );
 		es3ch8[i] = bitsToFloat24( bitsR ); */
         //temp
-        es3ch7[i] = 0.f;
-        es3ch8[i] = 0.f;
+        float a = IN(0)[i];
+        float b = IN(1)[i];
+        float c = IN(2)[i];
+        float d = IN(3)[i];
+        float e = IN(4)[i];
+        float f = IN(5)[i];
+
+        es3ch7[i] = 0.f * (a + b + c);
+        es3ch8[i] = 0.f * (d + e + f);
     }
 }
 

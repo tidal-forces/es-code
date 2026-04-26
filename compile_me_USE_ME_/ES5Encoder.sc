@@ -8,7 +8,8 @@ ES5Encoder : MultiOutUGen {
         )
     }
 
-    init {
+    init { |... theInputs|
+        inputs = theInputs;
         ^this.initOutputs(2, rate)
     }
 
