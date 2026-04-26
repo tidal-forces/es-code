@@ -21,10 +21,21 @@ static void ES5Encoder_Ctor(ES5Encoder* unit) {
     // set a calculation function
     SETCALC(ES5Encoder_next);
     // calculate one sample of output
-    ES5Encoder_next(unit, 1);
+    //**because still crashing? ES5Encoder_next(unit, 1);
+    //MultiOutUGen  output buffer state unsafe??
+    /* OUT0(0) = 0.f;
+    OUT0(1) = 0.f; */
 }
-
 //**********_HELPERS_********************************************************************************
+
+//***TEMP??? helper for crashing on integer problem
+static inline float readInput(Unit* unit, int index, int sampleIndex) {
+    if (INRATE(index) == calc_FullRate) {
+        return IN(index)[sampleIndex];
+    } else {
+        return IN0(index);
+    }
+}
 
 //clampByte helper: ensure the incoming signals are kept within 0 and 255 
 static inline uint32_t clampByte(float x) {
@@ -52,13 +63,13 @@ static inline float bitsToFloat24(uint32_t bits) {
 
 // this function is called every control period 
 static void ES5Encoder_next(ES5Encoder* unit, int inNumSamples) {
-    // IN and OUT are helper macros that return audio-rate input and output buffers
+    /* // IN and OUT are helper macros that return audio-rate input and output buffers
     const float *es5header1 = IN(0); // first header (es-5 main panel)
     const float *es5header2 = IN(1); // second header
     const float *es5header3 = IN(2); // third header
     const float *es5header4 = IN(3); // fourth header
     const float *es5header5 = IN(4); // fifth header
-    const float *es5header6 = IN(5); // sixth header 
+    const float *es5header6 = IN(5); // sixth header */
 
     float *es3ch7 = OUT(0); //  "left" output, ie ch7, drives headers 1,2,3
     float *es3ch8 = OUT(1); //  "right" output, ie ch8, drives headers 4,5,6 
@@ -67,12 +78,18 @@ static void ES5Encoder_next(ES5Encoder* unit, int inNumSamples) {
     for (int i = 0; i < inNumSamples; i++) {
 
         //Clamp: ensure the incoming signals are kept within 0 and 255 (an 8-bit byte) 
-        uint32_t h1 = clampByte(es5header1[i]);
+/*         uint32_t h1 = clampByte(es5header1[i]);
         uint32_t h2 = clampByte(es5header2[i]);
         uint32_t h3 = clampByte(es5header3[i]);
         uint32_t h4 = clampByte(es5header4[i]);
         uint32_t h5 = clampByte(es5header5[i]);
-        uint32_t h6 = clampByte(es5header6[i]); 
+        uint32_t h6 = clampByte(es5header6[i]); */
+        uint32_t h1 = clampByte(readInput(unit, 0, i));
+        uint32_t h2 = clampByte(readInput(unit, 1, i));
+        uint32_t h3 = clampByte(readInput(unit, 2, i));
+        uint32_t h4 = clampByte(readInput(unit, 3, i));
+        uint32_t h5 = clampByte(readInput(unit, 4, i));
+        uint32_t h6 = clampByte(readInput(unit, 5, i));
 
         //Bit Packing: create the 24-bit word (N.B. 3 for each of ch7/left and ch8/right)
         uint32_t bitsL = ( h1 << 16 ) | ( h2 << 8 ) | h3;
@@ -82,6 +99,16 @@ static void ES5Encoder_next(ES5Encoder* unit, int inNumSamples) {
         //Bits to float: Interpret the 24-bit word as signed 24-bit PCM and normalize to [-1, 1).
         es3ch7[i] = bitsToFloat24( bitsL );
 		es3ch8[i] = bitsToFloat24( bitsR ); 
+        //temp
+        /* float a = IN(0)[i];
+        float b = IN(1)[i];
+        float c = IN(2)[i];
+        float d = IN(3)[i];
+        float e = IN(4)[i];
+        float f = IN(5)[i];
+
+        es3ch7[i] = 0.f * (a + b + c);
+        es3ch8[i] = 0.f * (d + e + f); */
     }
 }
 
