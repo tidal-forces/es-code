@@ -13,25 +13,25 @@
 static InterfaceTable *ft;
 
 // declare struct to hold unit generator state
-struct esX8CVEncoder : public Unit {
+struct ESX8CVEncoder : public Unit {
     // declare state variables here.
     int mPhase;
     uint32_t mValue;
 };
 
 // function declarations
-static void esX8CVEncoder_next(esX8CVEncoder *unit, int inNumSamples);
-static void esX8CVEncoder_Ctor(esX8CVEncoder *unit);
+static void ESX8CVEncoder_next(ESX8CVEncoder *unit, int inNumSamples);
+static void ESX8CVEncoder_Ctor(ESX8CVEncoder *unit);
 
 // the constructor function is called when a Synth containing this ugen is played
-static void esX8CVEncoder_Ctor(esX8CVEncoder *unit) {
+static void ESX8CVEncoder_Ctor(ESX8CVEncoder *unit) {
     // initialize state variables here.
     unit->mPhase = 0;
     unit->mValue = 0;
     // set a calculation function
-    SETCALC(esX8CVEncoder_next);
+    SETCALC(ESX8CVEncoder_next);
     // calculate one sample of output
-    esX8CVEncoder_next(unit, 1);
+    ESX8CVEncoder_next(unit, 1);
 }
 
 //=============HELPER=FXNS=================================================================================
@@ -87,7 +87,7 @@ static inline int returnNextPhase(int phase, int phaseInc) {
 //=============CALCULATION=FXN=================================================================================
 
 // this function is called every control period 
-static void esX8CVEncoder_next(esX8CVEncoder *unit, int inNumSamples) {
+static void ESX8CVEncoder_next(ESX8CVEncoder *unit, int inNumSamples) {
 
     int phase = unit->mPhase;
     uint32_t value = unit->mValue;
@@ -149,5 +149,5 @@ static void esX8CVEncoder_next(esX8CVEncoder *unit, int inNumSamples) {
 // the entry point is called by the host when the plug-in is loaded
 PluginLoad(esPlugins) {
     ft = inTable; // store pointer to InterfaceTable
-    DefineSimpleUnit(esX8CVEncoder);  //comment out if interfering w/ VS code error highlighting
+    DefineSimpleUnit(ESX8CVEncoder);  //comment out if interfering w/ VS code error highlighting
 }

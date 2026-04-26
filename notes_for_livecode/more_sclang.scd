@@ -116,5 +116,185 @@ SynthDef(\es5_h6_ch1_test, { |out = 6, bpm = 120, duty = 0.1|
 
 
 
+(
+SynthDef(\esx8cv_h3_zero_test, { |out = 6|
+    var zero = DC.ar(0);
+
+    var h3 = ESX8CVEncoder.ar(
+        zero, zero, zero, zero,
+        zero, zero, zero, zero
+    );
+
+    var encoded = ES5Encoder.ar(
+        DC.ar(0), DC.ar(0), h3,
+        DC.ar(0), DC.ar(0), DC.ar(0)
+    );
+
+    Out.ar(out, encoded);
+}).add;
+)
 
 
+~cv = Synth(\esx8cv_h3_zero_test);
+
+
+
+
+(
+SynthDef(\esx8cv_h5_zero_test, { |out = 6|
+    var zero = DC.ar(0);
+
+    var h5 = ESX8CVEncoder.ar(
+        zero, zero, zero, zero,
+        zero, zero, zero, zero
+    );
+
+    var encoded = ES5Encoder.ar(
+        DC.ar(0), DC.ar(0), DC.ar(0),
+        DC.ar(0), h5,       DC.ar(0)
+    );
+
+    Out.ar(out, encoded);
+}).add;
+)
+
+
+~cv = Synth(\esx8cv_h5_zero_test);
+
+
+
+
+(
+SynthDef(\esx8cv_h3_dac1_sine_test, { |out = 6, freq = 0.1|
+    var zero = DC.ar(0);
+
+    // Full raw 12-bit range expected by your encoder
+    var cv1 = SinOsc.ar(freq).range(-2048, 2047);
+
+    var h3 = ESX8CVEncoder.ar(
+        cv1,  zero, zero, zero,
+        zero, zero, zero, zero
+    );
+
+    var encoded = ES5Encoder.ar(
+        DC.ar(0), DC.ar(0), h3,
+        DC.ar(0), DC.ar(0), DC.ar(0)
+    );
+
+    Out.ar(out, encoded);
+}).add;
+)
+
+
+~cv = Synth(\esx8cv_h3_dac1_sine_test, [\freq, 0.05]);
+
+
+
+
+(
+SynthDef(\esx8cv_h5_dac1_sine_test, { |out = 6, freq = 0.1|
+    var zero = DC.ar(0);
+
+    var cv1 = SinOsc.ar(freq).range(-2048, 2047);
+
+    var h5 = ESX8CVEncoder.ar(
+        cv1,  zero, zero, zero,
+        zero, zero, zero, zero
+    );
+
+    var encoded = ES5Encoder.ar(
+        DC.ar(0), DC.ar(0), DC.ar(0),
+        DC.ar(0), h5,       DC.ar(0)
+    );
+
+    Out.ar(out, encoded);
+}).add;
+)
+
+~cv = Synth(\esx8cv_h5_dac1_sine_test, [\freq, 0.05]);
+
+
+(
+SynthDef(\esx8cv_sine_select_test, { |out = 6, header = 3, dac = 1, freq = 0.05, depth = 2047|
+    var zero = DC.ar(0);
+    var sine = SinOsc.ar(freq).range(depth.neg, depth);
+
+    var dacIndex = dac - 1;
+
+    var d1 = Select.ar(dacIndex, [sine, zero, zero, zero, zero, zero, zero, zero]);
+    var d2 = Select.ar(dacIndex, [zero, sine, zero, zero, zero, zero, zero, zero]);
+    var d3 = Select.ar(dacIndex, [zero, zero, sine, zero, zero, zero, zero, zero]);
+    var d4 = Select.ar(dacIndex, [zero, zero, zero, sine, zero, zero, zero, zero]);
+    var d5 = Select.ar(dacIndex, [zero, zero, zero, zero, sine, zero, zero, zero]);
+    var d6 = Select.ar(dacIndex, [zero, zero, zero, zero, zero, sine, zero, zero]);
+    var d7 = Select.ar(dacIndex, [zero, zero, zero, zero, zero, zero, sine, zero]);
+    var d8 = Select.ar(dacIndex, [zero, zero, zero, zero, zero, zero, zero, sine]);
+
+    var cvEncoded = ESX8CVEncoder.ar(d1, d2, d3, d4, d5, d6, d7, d8);
+
+    var h3 = Select.ar(header - 3, [cvEncoded, zero, zero]);
+    var h4 = zero;
+    var h5 = Select.ar(header - 3, [zero, zero, cvEncoded]);
+
+    var encoded = ES5Encoder.ar(
+        zero, zero, h3,
+        h4,   h5,   zero
+    );
+
+    Out.ar(out, encoded);
+}).add;
+)
+
+// Header 3, DAC output 1
+~cv = Synth(\esx8cv_sine_select_test, [\header, 3, \dac, 1, \freq, 0.05]);
+
+// Switch to DAC 2
+~cv.set(\dac, 2);
+
+// Switch to header 5, DAC 1
+~cv.set(\header, 5, \dac, 1);
+
+// Smaller depth
+~cv.set(\depth, 1024);
+
+// Stop
+~cv.free;
+
+
+(
+SynthDef(\esx8cv_dual_zero_test, { |out = 6|
+    var zero = DC.ar(0);
+
+    var h3 = ESX8CVEncoder.ar(
+        zero, zero, zero, zero,
+        zero, zero, zero, zero
+    );
+
+    var h5 = ESX8CVEncoder.ar(
+        zero, zero, zero, zero,
+        zero, zero, zero, zero
+    );
+
+    var encoded = ES5Encoder.ar(
+        zero, zero, h3,
+        zero, h5,   zero
+    );
+
+    Out.ar(out, encoded);
+}).add;
+)
+
+
+~cv = Synth(\esx8cv_dual_zero_test);
+
+
+
+
+
+~cv.free;
+
+
+
+
+
+s.reboot;
